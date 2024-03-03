@@ -1,5 +1,5 @@
 import math
-from Triangle import Triangle
+from maths.Triangle import Triangle
 
 def rotate_y(a, tris):
     while a >= 360:

@@ -1,5 +1,5 @@
 import math
-from Vector import Vector
+from maths.Vector import Vector
 
 mat_proj = []
 for i in range(4):
