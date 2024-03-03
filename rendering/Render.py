@@ -7,13 +7,14 @@ from rendering.Perspective import *
 from maths.Vector import *
 
 class Object:
-    def __init__(self, obj_path, screen):
+    def __init__(self, obj_path, screen, rgb):
         self.camera = [0, 0, -150]
         self.points = {}
         self.raw_triangles = []
         self.triangles = []
         self.counter = 1
         self.projected_triangles = []
+        self.rgb = rgb
 
         self.rotation_x = 0
         self.rotation_y = 0
@@ -21,7 +22,6 @@ class Object:
         self.file_data = open(obj_path, "r")
         self.screen = screen
 
-    def draw(self):
         for point in self.file_data.readlines():
             if point[0] == "v" :
                 self.points[str(self.counter)] = [int(float(i) * 15) for i in point.replace("\n", "").replace("\t", "")[2:].split()]
@@ -49,8 +49,7 @@ class Object:
             cur_tri = []
             for ref_point in triangle:
                 cur_tri.append(self.points[ref_point])
-            self.triangles.append(Triangle(cur_tri, (0, 0, 0), triangle))
-
+            self.triangles.append(Triangle(cur_tri, rgb, triangle))
 
     def make_2d(self, point):
         return (point[0], point[1])
@@ -94,7 +93,6 @@ class Object:
 
     def render(self, to_render="other"):
         proj_tris = []
-        print(self.triangles)
         rotated_tris = rotate_x(self.rotation_x, self.triangles)
         rotated_tris = rotate_y(self.rotation_y, rotated_tris)
 
@@ -140,9 +138,12 @@ class Object:
                     light_dir.y /= l
                     light_dir.z /= l
 
-                color = 255 * (normal.x * light_dir.x + normal.y * light_dir.y + normal.z * light_dir.z) - 5
-                if color < 255 and color > 0:
-                    triangle.color = (color, color, color)
+                color = [0, 0, 0]
+                color[0] = max(0, min(255, self.rgb[0] * (normal.x * light_dir.x + normal.y * light_dir.y + normal.z * light_dir.z)))
+                color[1] = max(0, min(255, self.rgb[1] * (normal.x * light_dir.x + normal.y * light_dir.y + normal.z * light_dir.z)))
+                color[2] = max(0, min(255, self.rgb[2] * (normal.x * light_dir.x + normal.y * light_dir.y + normal.z * light_dir.z)))
+       
+                triangle.color = color
                 
                 new_points = []
                 for point in triangle.points:
